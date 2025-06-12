@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Explorer app</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="./styles/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Skip to Content -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Header -->
+    <header class="header" role="banner">
+        <nav class="navbar" role="navigation" aria-label="Main navigation">
+            <div class="nav-brand">
+                <h1>Story Explorer</h1>
+            </div>
+            <ul class="nav-menu" role="menubar">
+                <li role="none">
+                    <a href="#/" class="nav-link" role="menuitem" aria-label="Home page">
+                        <i class="fas fa-home" aria-hidden="true"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li role="none">
+                    <a href="#/stories" class="nav-link" role="menuitem" aria-label="Stories page">
+                        <i class="fas fa-book-open" aria-hidden="true"></i>
+                        <span>Stories</span>
+                    </a>
+                </li>
+                <li role="none">
+                    <a href="#/add-story" class="nav-link" role="menuitem" aria-label="Add new story">
+                        <i class="fas fa-plus-circle" aria-hidden="true"></i>
+                        <span>Add Story</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content" role="main">
+        <div id="app-container" class="app-container">
+            <!-- Content will be dynamically loaded here -->
+        </div>
+    </main>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner" aria-hidden="true">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="./scripts/index.js"></script>
+</body>
+</html>
