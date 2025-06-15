@@ -1,15 +1,14 @@
 import L from "leaflet"
 
 export class StoriesView {
-  render(stories, options = {}) {
-    // Check if Leaflet is available
-    if (typeof L === "undefined") {
-      console.error("Leaflet library not loaded")
-      return
-    }
+  constructor() {
+    this.onPageChange = null
+    this.onStoryClick = null
+  }
 
+  render(viewData) {
+    const { stories, pagination } = viewData
     const container = document.getElementById("app-container")
-    const { currentPage = 1, hasMore = false, onPageChange, onStoryClick } = options
 
     if (!stories || stories.length === 0) {
       container.innerHTML = `
@@ -32,7 +31,7 @@ export class StoriesView {
     const storiesHtml = stories
       .map(
         (story, index) => `
-            <article class="story-card" role="article" style="animation-delay: ${index * 0.1}s" data-story-id="${story.id}">
+            <article class="story-card" role="article" style="animation-delay: ${index * 0.1}s">
                 <img 
                     src="${story.photoUrl || "/placeholder.svg?height=220&width=380"}" 
                     alt="${story.description ? `Foto untuk cerita: ${story.description.substring(0, 50)}...` : "Foto cerita"}"
@@ -59,41 +58,29 @@ export class StoriesView {
                     `
                         : ""
                     }
-                    ${
-                      onStoryClick
-                        ? `
-                        <div style="margin-top: 1rem;">
-                            <button class="btn btn-primary story-detail-btn" data-story-id="${story.id}">
-                                <i class="fas fa-eye" aria-hidden="true"></i>
-                                Lihat Detail
-                            </button>
-                        </div>
-                    `
-                        : ""
-                    }
                 </div>
             </article>
         `,
       )
       .join("")
 
-    const paginationHtml = onPageChange
+    const paginationHtml = pagination
       ? `
         <div class="pagination-container">
             <button 
                 class="pagination-btn" 
-                id="prev-page" 
-                ${currentPage <= 1 ? "disabled" : ""}
+                id="prev-page-btn"
+                ${pagination.currentPage <= 1 ? "disabled" : ""}
                 aria-label="Halaman sebelumnya"
             >
                 <i class="fas fa-chevron-left" aria-hidden="true"></i>
                 Sebelumnya
             </button>
-            <span class="pagination-info">Halaman ${currentPage}</span>
+            <span class="pagination-info">Halaman ${pagination.currentPage}</span>
             <button 
                 class="pagination-btn" 
-                id="next-page" 
-                ${!hasMore ? "disabled" : ""}
+                id="next-page-btn"
+                ${!pagination.hasMore ? "disabled" : ""}
                 aria-label="Halaman selanjutnya"
             >
                 Selanjutnya
@@ -122,29 +109,8 @@ export class StoriesView {
         </div>
     `
 
-    // Setup pagination event listeners
-    if (onPageChange) {
-      const prevBtn = document.getElementById("prev-page")
-      const nextBtn = document.getElementById("next-page")
-
-      if (prevBtn && !prevBtn.disabled) {
-        prevBtn.addEventListener("click", () => onPageChange(currentPage - 1))
-      }
-
-      if (nextBtn && !nextBtn.disabled) {
-        nextBtn.addEventListener("click", () => onPageChange(currentPage + 1))
-      }
-    }
-
-    // Setup story detail event listeners
-    if (onStoryClick) {
-      document.querySelectorAll(".story-detail-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          const storyId = e.target.closest(".story-detail-btn").dataset.storyId
-          onStoryClick(storyId)
-        })
-      })
-    }
+    // Initialize pagination handlers
+    this.initializePagination(pagination)
 
     // Initialize maps with enhanced layers
     setTimeout(() => {
@@ -156,42 +122,32 @@ export class StoriesView {
     }, 100)
   }
 
-  formatDate(dateString) {
-    if (!dateString) return "Tanggal tidak diketahui"
+  initializePagination(pagination) {
+    if (!pagination) return
 
-    try {
-      const date = new Date(dateString)
-      return date.toLocaleDateString("id-ID", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
+    const prevBtn = document.getElementById("prev-page-btn")
+    const nextBtn = document.getElementById("next-page-btn")
+
+    if (prevBtn && !prevBtn.disabled) {
+      prevBtn.addEventListener("click", () => {
+        if (this.onPageChange) {
+          this.onPageChange(pagination.currentPage - 1)
+        }
       })
-    } catch (error) {
-      return "Tanggal tidak valid"
     }
-  }
 
-  showError(message) {
-    const container = document.getElementById("app-container")
-    container.innerHTML = `
-            <div class="page-transition">
-                <div class="stories-header">
-                    <h2 class="stories-title">
-                        <i class="fas fa-book-open" aria-hidden="true"></i>
-                        Cerita Terbaru
-                    </h2>
-                    <div class="error-message" role="alert">
-                        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
-                        <strong>Error:</strong> ${message}
-                    </div>
-                </div>
-            </div>
-        `
+    if (nextBtn && !nextBtn.disabled) {
+      nextBtn.addEventListener("click", () => {
+        if (this.onPageChange) {
+          this.onPageChange(pagination.currentPage + 1)
+        }
+      })
+    }
   }
 
   initializeEnhancedMap(story) {
     const mapElement = document.getElementById(`map-${story.id}`)
-    if (!mapElement || typeof L === "undefined") return
+    if (!mapElement) return
 
     try {
       const map = L.map(`map-${story.id}`, {
@@ -276,5 +232,58 @@ export class StoriesView {
             </div>
         `
     }
+  }
+
+  formatDate(dateString) {
+    if (!dateString) return "Tanggal tidak diketahui"
+
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    } catch (error) {
+      return "Tanggal tidak valid"
+    }
+  }
+
+  showError(message) {
+    const container = document.getElementById("app-container")
+    container.innerHTML = `
+            <div class="page-transition">
+                <div class="stories-header">
+                    <h2 class="stories-title">Cerita Terbaru</h2>
+                    <div class="error-message" role="alert">
+                        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                        ${message}
+                    </div>
+                </div>
+            </div>
+        `
+  }
+
+  // View handles loading state
+  showLoading(show) {
+    const spinner = document.getElementById("loading-spinner")
+    if (spinner) {
+      if (show) {
+        spinner.classList.add("show")
+        spinner.setAttribute("aria-hidden", "false")
+      } else {
+        spinner.classList.remove("show")
+        spinner.setAttribute("aria-hidden", "true")
+      }
+    }
+  }
+
+  // Set handlers from Presenter
+  setPageChangeHandler(handler) {
+    this.onPageChange = handler
+  }
+
+  setStoryClickHandler(handler) {
+    this.onStoryClick = handler
   }
 }

@@ -2,14 +2,37 @@ export class StoryModel {
   constructor() {
     this.baseUrl = "https://story-api.dicoding.dev/v1"
     this.stories = []
-    this.token = localStorage.getItem('authToken')
-    this.user = JSON.parse(localStorage.getItem('user') || 'null')
+    this.token = this.getStoredToken()
+    this.user = this.getStoredUser()
+  }
+
+  // Storage methods - Model handles all storage operations
+  getStoredToken() {
+    return localStorage.getItem("authToken")
+  }
+
+  getStoredUser() {
+    const userData = localStorage.getItem("user")
+    return userData ? JSON.parse(userData) : null
+  }
+
+  storeAuthData(token, user) {
+    localStorage.setItem("authToken", token)
+    localStorage.setItem("user", JSON.stringify(user))
+    this.token = token
+    this.user = user
+  }
+
+  clearAuthData() {
+    localStorage.removeItem("authToken")
+    localStorage.removeItem("user")
+    this.token = null
+    this.user = null
   }
 
   // Authentication methods
   async register(userData) {
     try {
-      this.showLoading(true)
       const response = await fetch(`${this.baseUrl}/register`, {
         method: "POST",
         headers: {
@@ -27,14 +50,11 @@ export class StoryModel {
     } catch (error) {
       console.error("Error registering user:", error)
       throw error
-    } finally {
-      this.showLoading(false)
     }
   }
 
   async login(credentials) {
     try {
-      this.showLoading(true)
       const response = await fetch(`${this.baseUrl}/login`, {
         method: "POST",
         headers: {
@@ -49,29 +69,22 @@ export class StoryModel {
       }
 
       // Store authentication data
-      this.token = data.loginResult.token
-      this.user = {
+      const userData = {
         userId: data.loginResult.userId,
         name: data.loginResult.name,
       }
-      
-      localStorage.setItem('authToken', this.token)
-      localStorage.setItem('user', JSON.stringify(this.user))
+
+      this.storeAuthData(data.loginResult.token, userData)
 
       return data
     } catch (error) {
       console.error("Error logging in:", error)
       throw error
-    } finally {
-      this.showLoading(false)
     }
   }
 
   logout() {
-    this.token = null
-    this.user = null
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('user')
+    this.clearAuthData()
   }
 
   isAuthenticated() {
@@ -84,24 +97,22 @@ export class StoryModel {
 
   async getAllStories(page = 1, size = 10, location = 1) {
     try {
-      this.showLoading(true)
       const params = new URLSearchParams({
         page: page.toString(),
         size: size.toString(),
-        location: location.toString()
+        location: location.toString(),
       })
 
       const headers = {
         "Content-Type": "application/json",
       }
 
-      // Only add auth header if token exists
       if (this.token) {
         headers.Authorization = `Bearer ${this.token}`
       }
 
       const response = await fetch(`${this.baseUrl}/stories?${params}`, {
-        headers
+        headers,
       })
 
       if (!response.ok) {
@@ -114,25 +125,19 @@ export class StoryModel {
     } catch (error) {
       console.error("Error fetching stories:", error)
       throw error
-    } finally {
-      this.showLoading(false)
     }
   }
 
   async getStoryDetail(id) {
     try {
-      this.showLoading(true)
-      const headers = {
-        "Content-Type": "application/json",
-      }
-      
-      // Only add auth header if token exists
+      const headers = {}
+
       if (this.token) {
         headers.Authorization = `Bearer ${this.token}`
       }
 
       const response = await fetch(`${this.baseUrl}/stories/${id}`, {
-        headers
+        headers,
       })
 
       if (!response.ok) {
@@ -144,18 +149,14 @@ export class StoryModel {
     } catch (error) {
       console.error("Error fetching story detail:", error)
       throw error
-    } finally {
-      this.showLoading(false)
     }
   }
 
   async addStory(storyData) {
     try {
-      this.showLoading(true)
-
       const formData = new FormData()
       formData.append("description", storyData.description)
-      
+
       if (storyData.lat) {
         formData.append("lat", storyData.lat)
       }
@@ -169,7 +170,7 @@ export class StoryModel {
       // Use authenticated endpoint if logged in, otherwise use guest endpoint
       const endpoint = this.token ? "/stories" : "/stories/guest"
       const headers = {}
-      
+
       if (this.token) {
         headers.Authorization = `Bearer ${this.token}`
       }
@@ -190,8 +191,6 @@ export class StoryModel {
     } catch (error) {
       console.error("Error adding story:", error)
       throw error
-    } finally {
-      this.showLoading(false)
     }
   }
 
@@ -206,15 +205,15 @@ export class StoryModel {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.token}`
+          Authorization: `Bearer ${this.token}`,
         },
         body: JSON.stringify({
           endpoint: subscription.endpoint,
           keys: {
             p256dh: subscription.keys.p256dh,
-            auth: subscription.keys.auth
-          }
-        })
+            auth: subscription.keys.auth,
+          },
+        }),
       })
 
       if (!response.ok) {
@@ -239,9 +238,9 @@ export class StoryModel {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.token}`
+          Authorization: `Bearer ${this.token}`,
         },
-        body: JSON.stringify({ endpoint })
+        body: JSON.stringify({ endpoint }),
       })
 
       if (!response.ok) {
@@ -253,19 +252,6 @@ export class StoryModel {
     } catch (error) {
       console.error("Error unsubscribing from notifications:", error)
       throw error
-    }
-  }
-
-  showLoading(show) {
-    const spinner = document.getElementById("loading-spinner")
-    if (spinner) {
-      if (show) {
-        spinner.classList.add("show")
-        spinner.setAttribute("aria-hidden", "false")
-      } else {
-        spinner.classList.remove("show")
-        spinner.setAttribute("aria-hidden", "true")
-      }
     }
   }
 }

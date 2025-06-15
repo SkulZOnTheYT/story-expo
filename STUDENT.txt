@@ -1,0 +1,53 @@
+# Story Explorer - Single Page Application
+
+## API Information
+- Story API: https://story-api.dicoding.dev/v1/
+- Map Service: OpenStreetMap (No API key required)
+- Leaflet.js for map functionality
+
+## Features Implemented
+1. ✅ Single-Page Application with hash routing
+2. ✅ MVP (Model-View-Presenter) architecture
+3. ✅ Story API integration for data fetching and posting
+4. ✅ Interactive map with markers and popups
+5. ✅ Camera integration for photo capture
+6. ✅ Location selection via map clicks
+7. ✅ Accessibility features (skip links, ARIA labels, semantic HTML)
+8. ✅ View Transition API for smooth page transitions
+9. ✅ Responsive design
+10. ✅ Form validation and error handling
+
+## Accessibility Features
+- Skip to content link
+- Proper ARIA labels and roles
+- Semantic HTML structure
+- Alt text for images
+- Form labels associated with inputs
+- Focus indicators
+- Screen reader friendly messages
+
+## Technical Stack
+- Vanilla JavaScript (ES6+)
+- HTML5 with semantic elements
+- CSS3 with modern features
+- Leaflet.js for maps
+- MediaDevices API for camera
+- Fetch API for HTTP requests
+- View Transition API for smooth transitions
+
+## Browser Requirements
+- Modern browsers with ES6+ support
+- Camera access permission
+- Geolocation permission (optional)
+- JavaScript enabled
+
+## Map Service
+Using OpenStreetMap with Leaflet.js - no API key required.
+Tiles served from: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+
+## Notes
+- Camera stream is properly stopped when not in use
+- Form validation includes client-side checks
+- Error handling for API failures
+- Responsive design for mobile devices
+- Progressive enhancement approach

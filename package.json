@@ -1,17 +1,8 @@
 {
-  "name": "starter-project-with-vite",
+  "name": "my-v0-project",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^6.2.0"
-  },
-  "dependencies": {
-    "leaflet": "^1.9.4"
+    "build": "echo 'no build script'"
   }
 }
