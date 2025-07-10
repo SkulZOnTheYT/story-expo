@@ -124,10 +124,15 @@ class App {
           registration = await navigator.serviceWorker.register("/workbox-sw.js")
           console.log("Workbox Service Worker registered successfully")
         } catch (workboxError) {
-          console.log("Workbox not available, using fallback service worker")
-          // Fallback to basic service worker
-          registration = await navigator.serviceWorker.register("/sw.js")
-          console.log("Fallback Service Worker registered successfully")
+          console.log("Workbox not available, trying fallback service worker")
+          try {
+            // Fallback to basic service worker
+            registration = await navigator.serviceWorker.register("/sw.js")
+            console.log("Fallback Service Worker registered successfully")
+          } catch (fallbackError) {
+            console.log("Service Worker not supported in this environment:", fallbackError.message)
+            return // Exit gracefully if service workers are not supported
+          }
         }
 
         // Handle service worker updates
@@ -148,7 +153,7 @@ class App {
           }
         })
       } catch (error) {
-        console.error("Service Worker registration failed:", error)
+        console.log("Service Worker registration failed - continuing without service worker:", error.message)
       }
     }
   }
