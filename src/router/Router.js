@@ -14,13 +14,6 @@ export class Router {
   }
 
   navigate(path) {
-    // Check if offline and trying to access non-home pages
-    if (!navigator.onLine && path !== "/") {
-      console.log("Offline mode: redirecting to home page")
-      path = "/"
-      window.location.hash = "/"
-    }
-
     // Handle parameterized routes
     const matchedRoute = this.matchRoute(path)
     if (matchedRoute) {
@@ -89,14 +82,6 @@ export class Router {
     // Handle hash changes
     window.addEventListener("hashchange", () => {
       const path = window.location.hash.substring(1) || "/"
-      
-      // Check if offline and trying to access non-home pages
-      if (!navigator.onLine && path !== "/") {
-        console.log("Offline mode: redirecting to home page")
-        window.location.hash = "/"
-        return
-      }
-      
       const matchedRoute = this.matchRoute(path)
       if (matchedRoute) {
         this.currentRoute = path

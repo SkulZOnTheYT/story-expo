@@ -69,6 +69,23 @@ export class IndexedDBHelper {
     return Promise.all(promises)
   }
 
+  // Save single story (for story details)
+  async saveStory(story) {
+    if (!this.db) await this.init()
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction(["stories"], "readwrite")
+      const store = transaction.objectStore("stories")
+      const request = store.put({
+        ...story,
+        cachedAt: new Date().toISOString(),
+      })
+
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+  }
+
   async getStories() {
     if (!this.db) await this.init()
 
@@ -78,7 +95,10 @@ export class IndexedDBHelper {
       const request = store.getAll()
 
       request.onsuccess = () => {
-        resolve(request.result || [])
+        const stories = request.result || []
+        // Sort by creation date, newest first
+        stories.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        resolve(stories)
       }
       request.onerror = () => reject(request.error)
     })

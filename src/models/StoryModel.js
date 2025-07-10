@@ -116,7 +116,7 @@ export class StoryModel {
     try {
       console.log("Fetching stories - Auth status:", this.isAuthenticated(), "Token:", !!this.token)
 
-      // Try network first
+      // Try network first if online
       if (this.isOnline) {
         const params = new URLSearchParams({
           page: page.toString(),
@@ -151,9 +151,11 @@ export class StoryModel {
 
           this.stories = data.listStory || []
 
-          // Cache stories in IndexedDB
+          // Cache stories in IndexedDB when successful
           if (this.stories.length > 0) {
             await this.dbHelper.saveStories(this.stories)
+            console.log("Stories (without auth) cached to IndexedDB:", this.stories.length)
+            console.log("Stories cached to IndexedDB:", this.stories.length)
           }
 
           return {
@@ -164,44 +166,61 @@ export class StoryModel {
             source: "network",
           }
         } else {
-          // Log error details
+          // Log error details but don't fallback to cache immediately
           const errorText = await response.text()
           console.error("API Error:", response.status, errorText)
 
-          // If unauthorized, try without auth
+          // If unauthorized, try without auth first
           if (response.status === 401 && this.token) {
             console.log("Unauthorized with token, trying without auth...")
             return this.getAllStoriesWithoutAuth(page, size, location)
           }
 
+          // For other errors, fallback to cache
+          console.log("Network error, falling back to cache...")
+          const cachedStories = await this.dbHelper.getStories()
+          
+          if (cachedStories.length > 0) {
+            return {
+              stories: cachedStories,
+              currentPage: 1,
+              hasMore: false,
+              totalStories: cachedStories.length,
+              source: "cache",
+            }
+          }
+          
           throw new Error(`HTTP ${response.status}: ${errorText}`)
         }
-      }
-
-      // Fallback to cached data
-      console.log("Loading stories from cache...")
-      const cachedStories = await this.dbHelper.getStories()
-
-      return {
-        stories: cachedStories,
-        currentPage: 1,
-        hasMore: false,
-        totalStories: cachedStories.length,
-        source: "cache",
+      } else {
+        // Offline mode - get from cache immediately
+        console.log("Offline mode: Loading stories from IndexedDB...")
+        const cachedStories = await this.dbHelper.getStories()
+        
+        return {
+          stories: cachedStories,
+          currentPage: 1,
+          hasMore: false,
+          totalStories: cachedStories.length,
+          source: "cache",
+          offline: true,
+        }
       }
     } catch (error) {
       console.error("Error fetching stories:", error)
 
-      // Try to get cached stories as fallback
+      // Always try to get cached stories as final fallback
       try {
         const cachedStories = await this.dbHelper.getStories()
         if (cachedStories.length > 0) {
+          console.log("Using cached stories as fallback:", cachedStories.length)
           return {
             stories: cachedStories,
             currentPage: 1,
             hasMore: false,
             totalStories: cachedStories.length,
             source: "cache",
+            error: true,
           }
         }
       } catch (cacheError) {
@@ -260,7 +279,7 @@ export class StoryModel {
     try {
       console.log(`Fetching story detail for ID: ${id}`)
 
-      // Try network first
+      // Try network first if online
       if (this.isOnline) {
         const headers = {
           "Content-Type": "application/json",
@@ -292,24 +311,54 @@ export class StoryModel {
             story = data
           }
 
+          // Cache the story detail in IndexedDB
+          if (story) {
+            await this.dbHelper.saveStory(story)
+            console.log("Story detail (without auth) cached to IndexedDB:", story.id)
+          }
+
+          // Cache the story detail in IndexedDB
+          if (story) {
+            await this.dbHelper.saveStory(story)
+            console.log("Story detail cached to IndexedDB:", story.id)
+          }
+
           return story
         } else if (response.status === 401 && this.token) {
           // Try without auth if unauthorized
           return this.getStoryDetailWithoutAuth(id)
+        } else {
+          // Network error, fallback to cache
+          console.log("Network error for story detail, falling back to cache...")
+          const cachedStory = await this.dbHelper.getStoryById(id)
+          if (cachedStory) {
+            return cachedStory
+          }
+          throw new Error(`HTTP ${response.status}`)
         }
+      } else {
+        // Offline mode - get from cache immediately
+        console.log("Offline mode: Loading story detail from IndexedDB...")
+        const cachedStory = await this.dbHelper.getStoryById(id)
+        if (cachedStory) {
+          return cachedStory
+        }
+        throw new Error("Story not found in offline cache")
       }
-
-      // Fallback to cached data
-      console.log("Loading story detail from cache...")
-      const cachedStory = await this.dbHelper.getStoryById(id)
-
-      if (cachedStory) {
-        return cachedStory
-      }
-
-      throw new Error("Story not found in cache")
     } catch (error) {
       console.error("Error fetching story detail:", error)
+      
+      // Final fallback to cache
+      try {
+        const cachedStory = await this.dbHelper.getStoryById(id)
+        if (cachedStory) {
+          console.log("Using cached story detail as fallback:", id)
+          return cachedStory
+        }
+      } catch (cacheError) {
+        console.error("Error loading cached story detail:", cacheError)
+      }
+      
       throw error
     }
   }

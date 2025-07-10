@@ -28,13 +28,19 @@ export class StoriesView {
             </h2>
             <p class="stories-subtitle">
               <i class="fas fa-info-circle" aria-hidden="true"></i>
-              Belum ada cerita yang tersedia. ${navigator.onLine ? "Coba refresh halaman." : "Periksa koneksi internet Anda."}
+              Belum ada cerita yang tersedia. ${navigator.onLine ? "Coba refresh halaman." : "Tidak ada data offline yang tersimpan."}
             </p>
             <div style="text-align: center; margin-top: 2rem;">
-              <button onclick="window.location.reload()" class="btn btn-primary">
-                <i class="fas fa-refresh" aria-hidden="true"></i>
-                Refresh Halaman
-              </button>
+              ${navigator.onLine ? 
+                `<button onclick="window.location.reload()" class="btn btn-primary">
+                  <i class="fas fa-refresh" aria-hidden="true"></i>
+                  Refresh Halaman
+                </button>` :
+                `<div class="offline-message">
+                  <i class="fas fa-wifi-slash" style="font-size: 2rem; color: #ef4444; margin-bottom: 1rem;"></i>
+                  <p>Anda sedang offline. Cerita akan muncul setelah terhubung ke internet.</p>
+                </div>`
+              }
             </div>
           </div>
         </div>
