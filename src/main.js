@@ -117,12 +117,12 @@ class App {
   async initializeServiceWorker() {
     if ("serviceWorker" in navigator) {
       try {
-        // Register service worker
+        // Register Workbox service worker
         let registration
 
-        // Try to register the service worker
+        // Register Workbox generated service worker
         registration = await navigator.serviceWorker.register("/sw.js")
-        console.log("Service Worker registered successfully")
+        console.log("Workbox Service Worker registered successfully")
 
         // Handle service worker updates
         registration.addEventListener("updatefound", () => {
@@ -140,9 +140,14 @@ class App {
             // Handle background sync completion
             this.handleBackgroundSync()
           }
+          
+          // Handle Workbox messages
+          if (event.data && event.data.type === "CACHE_UPDATED") {
+            console.log("Cache updated by Workbox")
+          }
         })
       } catch (error) {
-        console.log("Service Worker registration failed - continuing without service worker:", error.message)
+        console.log("Workbox Service Worker registration failed - continuing without service worker:", error.message)
       }
     }
   }
