@@ -117,23 +117,12 @@ class App {
   async initializeServiceWorker() {
     if ("serviceWorker" in navigator) {
       try {
-        // Try to register Workbox service worker first (for production)
+        // Register service worker
         let registration
 
-        try {
-          registration = await navigator.serviceWorker.register("/workbox-sw.js")
-          console.log("Workbox Service Worker registered successfully")
-        } catch (workboxError) {
-          console.log("Workbox not available, trying fallback service worker")
-          try {
-            // Fallback to basic service worker
-            registration = await navigator.serviceWorker.register("/sw.js")
-            console.log("Fallback Service Worker registered successfully")
-          } catch (fallbackError) {
-            console.log("Service Worker not supported in this environment:", fallbackError.message)
-            return // Exit gracefully if service workers are not supported
-          }
-        }
+        // Try to register the service worker
+        registration = await navigator.serviceWorker.register("/sw.js")
+        console.log("Service Worker registered successfully")
 
         // Handle service worker updates
         registration.addEventListener("updatefound", () => {

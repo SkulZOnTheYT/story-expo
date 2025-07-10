@@ -3,12 +3,12 @@ import { resolve } from "path"
 
 export default defineConfig({
   root: resolve(__dirname, 'src'),
-  publicDir: resolve(__dirname,'public'),
+  publicDir: resolve(__dirname, 'public'),
   build: {
+    outDir: resolve(__dirname, 'dist'),
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "index.html"),
-        sw: resolve(__dirname, "public/workbox-sw.js"),
+        main: resolve(__dirname, "src/index.html"),
       },
     },
   },
@@ -18,6 +18,6 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000, // Coba port lain, misalnya 3000 atau 8080
+    port: 3000,
   },
 });
