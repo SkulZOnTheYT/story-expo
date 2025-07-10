@@ -4,7 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Story Explorer - Jelajahi Cerita dari Seluruh Dunia</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Aplikasi untuk menjelajahi dan berbagi cerita dari seluruh dunia dengan peta interaktif">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Story Explorer">
+    <meta name="msapplication-TileColor" content="#6366f1">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="./styles/main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,11 +28,38 @@
     <!-- Skip to Content -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
     
+    <!-- PWA Install Banner -->
+    <div id="install-banner" class="install-banner" style="display: none;">
+        <div class="install-content">
+            <div class="install-icon">
+                <i class="fas fa-download" aria-hidden="true"></i>
+            </div>
+            <div class="install-text">
+                <h3>Install Story Explorer</h3>
+                <p>Install aplikasi untuk pengalaman yang lebih baik</p>
+            </div>
+            <div class="install-actions">
+                <button id="install-btn" class="btn btn-primary">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    Install
+                </button>
+                <button id="install-dismiss" class="btn btn-secondary">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                    Nanti
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Header -->
     <header class="header" role="banner">
         <nav class="navbar" role="navigation" aria-label="Main navigation">
             <div class="nav-brand">
                 <h1>Story Explorer</h1>
+                <div class="connection-status" id="connection-status">
+                    <i class="fas fa-wifi" aria-hidden="true"></i>
+                    <span>Online</span>
+                </div>
             </div>
             <ul class="nav-menu" role="menubar">
                 <li role="none">
@@ -40,6 +80,18 @@
                         <span>Add Story</span>
                     </a>
                 </li>
+                <li role="none">
+                    <a href="#/favorites" class="nav-link" role="menuitem" aria-label="Favorite stories">
+                        <i class="fas fa-heart" aria-hidden="true"></i>
+                        <span>Favorites</span>
+                    </a>
+                </li>
+                <li role="none">
+                    <a href="#/auth" class="nav-link" role="menuitem" aria-label="Login page">
+                        <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                        <span>Login</span>
+                    </a>
+                </li>
             </ul>
         </nav>
     </header>
@@ -58,7 +110,6 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module" src="./main.js"></script>
 </body>
 </html>

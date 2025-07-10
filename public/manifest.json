@@ -1,0 +1,126 @@
+{
+  "name": "Story Explorer - Jelajahi Cerita dari Seluruh Dunia",
+  "short_name": "Story Explorer",
+  "description": "Aplikasi untuk menjelajahi dan berbagi cerita dari seluruh dunia dengan peta interaktif",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "categories": ["social", "travel", "lifestyle"],
+  "lang": "id",
+  "shortcuts": [
+    {
+      "name": "Tambah Cerita Baru",
+      "short_name": "Tambah Cerita",
+      "description": "Buat dan bagikan cerita baru dengan foto dan lokasi",
+      "url": "/#/add-story"
+    },
+    {
+      "name": "Jelajahi Cerita",
+      "short_name": "Stories",
+      "description": "Lihat semua cerita dari seluruh dunia",
+      "url": "/#/stories"
+    },
+    {
+      "name": "Cerita Favorit",
+      "short_name": "Favorit",
+      "description": "Akses cerita favorit Anda",
+      "url": "/#/favorites"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/placeholder.svg?height=72&width=72&text=SE",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/placeholder.svg?height=96&width=96&text=SE",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/placeholder.svg?height=128&width=128&text=SE",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/placeholder.svg?height=144&width=144&text=SE",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/placeholder.svg?height=152&width=152&text=SE",
+      "sizes": "152x152",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/placeholder.svg?height=192&width=192&text=SE",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/placeholder.svg?height=384&width=384&text=SE",
+      "sizes": "384x384",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/placeholder.svg?height=512&width=512&text=SE",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/placeholder.svg?height=720&width=1280&text=Desktop+Home",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Halaman utama Story Explorer di desktop dengan fitur hero dan navigasi"
+    },
+    {
+      "src": "/placeholder.svg?height=720&width=1280&text=Desktop+Stories",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Daftar cerita dengan peta interaktif di desktop"
+    },
+    {
+      "src": "/placeholder.svg?height=720&width=1280&text=Desktop+Add+Story",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Form tambah cerita dengan kamera dan peta di desktop"
+    },
+    {
+      "src": "/placeholder.svg?height=844&width=390&text=Mobile+Home",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Halaman utama Story Explorer di mobile"
+    },
+    {
+      "src": "/placeholder.svg?height=844&width=390&text=Mobile+Stories",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Daftar cerita di mobile dengan navigasi responsif"
+    },
+    {
+      "src": "/placeholder.svg?height=844&width=390&text=Mobile+Add+Story",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Form tambah cerita di mobile dengan kamera terintegrasi"
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import L from "leaflet"
 export class StoryDetailView {
   render(story) {
     const container = document.getElementById("app-container")
+    
 
     if (!story) {
       container.innerHTML = `

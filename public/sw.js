@@ -1,159 +1,188 @@
-// Service Worker for Story Explorer App
-
+// Fallback Service Worker untuk development
 const CACHE_NAME = "story-explorer-v1"
-const STATIC_ASSETS = [
-  "/",
-  "/index.html",
-  "/src/main.js",
-  "/src/styles/main.css",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
-  "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
-  "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap",
-]
+const urlsToCache = ["/", "/index.html", "/src/styles/main.css", "/src/main.js", "/manifest.json"]
 
-// Install event - cache static assets
+// Install event
 self.addEventListener("install", (event) => {
+  console.log("Service Worker: Installing...")
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("Opened cache")
-      return cache.addAll(STATIC_ASSETS)
-    }),
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => {
+        console.log("Service Worker: Caching files")
+        return cache.addAll(urlsToCache)
+      })
+      .catch((error) => {
+        console.error("Service Worker: Cache failed", error)
+      }),
   )
 })
 
-// Activate event - clean up old caches
+// Activate event
 self.addEventListener("activate", (event) => {
+  console.log("Service Worker: Activating...")
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log("Deleting old cache:", cacheName)
+            console.log("Service Worker: Deleting old cache", cacheName)
             return caches.delete(cacheName)
           }
         }),
       )
     }),
   )
+  return self.clients.claim()
 })
 
-// Fetch event - serve from cache or network
+// Fetch event
 self.addEventListener("fetch", (event) => {
-  // Skip cross-origin requests
-  if (
-    !event.request.url.startsWith(self.location.origin) &&
-    !event.request.url.includes("unpkg.com") &&
-    !event.request.url.includes("cdnjs.cloudflare.com") &&
-    !event.request.url.includes("fonts.googleapis.com")
-  ) {
+  // Skip non-GET requests
+  if (event.request.method !== "GET") {
     return
   }
 
-  // API calls - network first, then cache
-  if (event.request.url.includes("story-api.dicoding.dev")) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // Clone the response
-          const responseToCache = response.clone()
-
-          // Cache the successful response
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache)
-          })
-
-          return response
-        })
-        .catch(() => {
-          // If network fails, try to serve from cache
-          return caches.match(event.request)
-        }),
-    )
-  } else {
-    // Static assets - cache first, then network
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        if (response) {
-          return response
-        }
-
-        // Clone the request
-        const fetchRequest = event.request.clone()
-
-        return fetch(fetchRequest).then((response) => {
-          // Check if valid response
-          if (!response || response.status !== 200 || response.type !== "basic") {
-            return response
-          }
-
-          // Clone the response
-          const responseToCache = response.clone()
-
-          // Cache the successful response
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache)
-          })
-
-          return response
-        })
-      }),
-    )
+  // Skip chrome-extension and other non-http requests
+  if (!event.request.url.startsWith("http")) {
+    return
   }
+
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      // Return cached version or fetch from network
+      return (
+        response ||
+        fetch(event.request)
+          .then((fetchResponse) => {
+            // Don't cache non-successful responses
+            if (!fetchResponse || fetchResponse.status !== 200 || fetchResponse.type !== "basic") {
+              return fetchResponse
+            }
+
+            // Clone the response
+            const responseToCache = fetchResponse.clone()
+
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache)
+            })
+
+            return fetchResponse
+          })
+          .catch(() => {
+            // Return offline page for navigation requests
+            if (event.request.mode === "navigate") {
+              return caches.match("/index.html")
+            }
+          })
+      )
+    }),
+  )
 })
 
-// Push event - handle push notifications
+// Push notification handling
 self.addEventListener("push", (event) => {
-  if (!event.data) return
+  console.log("Service Worker: Push notification received")
 
-  try {
-    const data = event.data.json()
-
-    const options = {
-      body: data.options.body || "Notifikasi baru dari Story Explorer",
-      icon: "/icon-192x192.png",
-      badge: "/badge-96x96.png",
-      vibrate: [100, 50, 100],
-      data: {
-        url: data.url || "/",
-      },
-    }
-
-    event.waitUntil(self.registration.showNotification(data.title || "Story Explorer", options))
-  } catch (error) {
-    console.error("Error showing notification:", error)
-
-    // Fallback notification
-    event.waitUntil(
-      self.registration.showNotification("Story Explorer", {
-        body: "Ada pembaruan baru untuk Anda",
-        icon: "/icon-192x192.png",
-        badge: "/badge-96x96.png",
-        vibrate: [100, 50, 100],
-      }),
-    )
+  let notificationData = {
+    title: "Story Explorer",
+    body: "Ada cerita baru untuk Anda!",
+    tag: "story-notification",
+    data: { url: "/" },
   }
+
+  if (event.data) {
+    try {
+      const data = event.data.json()
+      notificationData = { ...notificationData, ...data }
+    } catch (error) {
+      console.error("Error parsing push notification data:", error)
+    }
+  }
+
+  const options = {
+    body: notificationData.body,
+    tag: notificationData.tag,
+    vibrate: [100, 50, 100],
+    data: notificationData.data,
+    actions: [
+      {
+        action: "open",
+        title: "Buka Aplikasi",
+      },
+      {
+        action: "close",
+        title: "Tutup",
+      },
+    ],
+    requireInteraction: false,
+    silent: false,
+  }
+
+  event.waitUntil(self.registration.showNotification(notificationData.title, options))
 })
 
-// Notification click event - open the app
+// Notification click handling
 self.addEventListener("notificationclick", (event) => {
+  console.log("Service Worker: Notification clicked")
+
   event.notification.close()
 
-  const urlToOpen = event.notification.data?.url || "/"
+  const action = event.action
+  const notificationData = event.notification.data || {}
+  const urlToOpen = notificationData.url || "/"
+
+  if (action === "close") {
+    return
+  }
 
   event.waitUntil(
-    clients.matchAll({ type: "window" }).then((clientList) => {
-      // Check if a window is already open
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      // Check if app is already open
       for (const client of clientList) {
-        if (client.url === urlToOpen && "focus" in client) {
-          return client.focus()
+        if (client.url.includes(self.location.origin) && "focus" in client) {
+          client.focus()
+          if (urlToOpen !== "/") {
+            client.navigate(urlToOpen)
+          }
+          return
         }
       }
 
-      // If no window is open, open a new one
+      // Open new window if app is not open
       if (clients.openWindow) {
         return clients.openWindow(urlToOpen)
       }
     }),
   )
 })
+
+// Background sync (basic implementation)
+self.addEventListener("sync", (event) => {
+  console.log("Service Worker: Background sync triggered", event.tag)
+
+  if (event.tag === "sync-stories") {
+    event.waitUntil(
+      // Notify main thread about sync
+      self.clients
+        .matchAll()
+        .then((clients) => {
+          clients.forEach((client) => {
+            client.postMessage({
+              type: "SYNC_OFFLINE_STORIES",
+              message: "Background sync triggered",
+            })
+          })
+        }),
+    )
+  }
+})
+
+// Handle messages from main thread
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting()
+  }
+})
+
+console.log("Service Worker loaded successfully")
