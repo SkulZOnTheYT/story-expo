@@ -117,18 +117,9 @@ class App {
   async initializeServiceWorker() {
     if ("serviceWorker" in navigator) {
       try {
-        // Try to register Workbox service worker first (for production)
-        let registration
-
-        try {
-          registration = await navigator.serviceWorker.register("/workbox-sw.js")
-          console.log("Workbox Service Worker registered successfully")
-        } catch (workboxError) {
-          console.log("Workbox not available, using fallback service worker")
-          // Fallback to basic service worker
-          registration = await navigator.serviceWorker.register("/sw.js")
-          console.log("Fallback Service Worker registered successfully")
-        }
+        // Register Workbox generated service worker
+        const registration = await navigator.serviceWorker.register("/sw.js")
+        console.log("Workbox Service Worker registered successfully")
 
         // Handle service worker updates
         registration.addEventListener("updatefound", () => {
@@ -143,12 +134,14 @@ class App {
         // Listen for messages from service worker
         navigator.serviceWorker.addEventListener("message", (event) => {
           if (event.data && event.data.type === "SYNC_OFFLINE_STORIES") {
-            // Handle background sync completion
             this.handleBackgroundSync()
+          }
+          if (event.data && event.data.type === "WORKBOX_UPDATED") {
+            console.log("Workbox cache updated")
           }
         })
       } catch (error) {
-        console.error("Service Worker registration failed:", error)
+        console.log("Service Worker registration failed - continuing without service worker:", error.message)
       }
     }
   }
