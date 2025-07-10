@@ -1,6 +1,19 @@
 import L from "leaflet"
 
 export class StoryDetailView {
+  showLoading(isLoading) {
+    const loadingSpinner = document.getElementById("loading-spinner")
+    if (loadingSpinner) {
+      if (isLoading) {
+        loadingSpinner.classList.add("show")
+        loadingSpinner.setAttribute("aria-hidden", "false")
+      } else {
+        loadingSpinner.classList.remove("show")
+        loadingSpinner.setAttribute("aria-hidden", "true")
+      }
+    }
+  }
+
   render(story) {
     const container = document.getElementById("app-container")
     
