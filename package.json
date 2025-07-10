@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "workbox": "workbox generateSW workbox-config.js"
+    "workbox": "workbox generateSW workbox-config.cjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

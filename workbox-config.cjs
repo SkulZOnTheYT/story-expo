@@ -4,7 +4,7 @@ module.exports = {
     "**/*.{html,js,css,png,jpg,jpeg,svg,ico,json,woff,woff2,ttf,eot}"
   ],
   globIgnores: [
-    "workbox-config.js",
+    "workbox-config.cjs",
     "sw.js"
   ],
   swDest: "dist/sw.js",
