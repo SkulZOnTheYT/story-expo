@@ -48,7 +48,13 @@ export class StoryPresenter {
 
       // Show success message if data came from cache
       if (result.source === "cache") {
-        this.showCacheNotification()
+        if (result.offline) {
+          this.showOfflineNotification()
+        } else if (result.error) {
+          this.showCacheErrorNotification()
+        } else {
+          this.showCacheNotification()
+        }
       }
     } catch (error) {
       console.error("StoryPresenter: Error in showStories:", error)
@@ -106,6 +112,68 @@ export class StoryPresenter {
         notification.remove()
       }
     }, 5000)
+  }
+
+  showOfflineNotification() {
+    const notification = document.createElement("div")
+    notification.className = "offline-notification"
+    notification.style.cssText = `
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: #ef4444;
+      color: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-width: 300px;
+    `
+    notification.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fas fa-wifi-slash"></i>
+        <span>Mode Offline - Data dari cache</span>
+      </div>
+    `
+
+    document.body.appendChild(notification)
+
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove()
+      }
+    }, 7000)
+  }
+
+  showCacheErrorNotification() {
+    const notification = document.createElement("div")
+    notification.className = "cache-error-notification"
+    notification.style.cssText = `
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: #f59e0b;
+      color: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-width: 300px;
+    `
+    notification.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Koneksi bermasalah - Data dari cache</span>
+      </div>
+    `
+
+    document.body.appendChild(notification)
+
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove()
+      }
+    }, 6000)
   }
 
   async showStoryDetail(storyId) {
