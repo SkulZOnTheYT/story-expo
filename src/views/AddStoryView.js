@@ -222,6 +222,13 @@ export class AddStoryView {
 
   initializeEnhancedMap() {
     try {
+      const mapElement = document.getElementById("location-map")
+      if (!mapElement) return
+      
+      // Pastikan container memiliki ukuran yang tepat
+      mapElement.style.height = '400px'
+      mapElement.style.width = '100%'
+      
       this.map = L.map("location-map").setView([-6.2088, 106.8456], 10)
 
       // Define multiple tile layers
@@ -266,6 +273,13 @@ export class AddStoryView {
           collapsed: false,
         })
         .addTo(this.map)
+
+      // Force map to resize after initialization
+      setTimeout(() => {
+        if (this.map) {
+          this.map.invalidateSize()
+        }
+      }, 100)
 
       let marker = null
 

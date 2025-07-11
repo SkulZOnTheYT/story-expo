@@ -56,11 +56,11 @@ export class StoriesView {
     <article class="story-card" role="article" style="animation-delay: ${index * 0.1}s" data-story-id="${story.id}">
       <div class="story-image-container">
         <img 
-          src="${story.photoUrl || "/placeholder.svg?height=220&width=380"}" 
+          src="${story.photoUrl || "/placeholder.svg"}" 
           alt="${story.description ? `Foto untuk cerita: ${story.description.substring(0, 50)}...` : "Foto cerita"}"
           class="story-image"
           loading="lazy"
-          onerror="this.src='/placeholder.svg?height=220&width=380'"
+          onerror="this.src='/placeholder.svg'"
         />
         <button class="favorite-btn" data-story-id="${story.id}" aria-label="Toggle favorite">
           <i class="fas fa-heart" aria-hidden="true"></i>
@@ -226,10 +226,16 @@ export class StoriesView {
     if (!mapElement) return
 
     try {
+      // Pastikan container memiliki ukuran yang tepat
+      mapElement.style.height = '300px'
+      mapElement.style.width = '100%'
+      
       const map = L.map(`map-${story.id}`, {
         center: [story.lat, story.lon],
         zoom: 13,
         scrollWheelZoom: false,
+        zoomControl: true,
+        attributionControl: true
       })
 
       // Define multiple tile layers
@@ -239,6 +245,13 @@ export class StoriesView {
       })
 
       osmLayer.addTo(map)
+
+      // Force map to resize after a short delay
+      setTimeout(() => {
+        if (map) {
+          map.invalidateSize()
+        }
+      }, 100)
 
       // Custom marker icon
       const customIcon = L.divIcon({
@@ -270,6 +283,14 @@ export class StoriesView {
         maxWidth: 300,
         className: "custom-popup",
       })
+      
+      // Trigger another resize after marker is added
+      setTimeout(() => {
+        if (map) {
+          map.invalidateSize()
+        }
+      }, 200)
+      
     } catch (error) {
       console.error("Error initializing map:", error)
       mapElement.innerHTML = `

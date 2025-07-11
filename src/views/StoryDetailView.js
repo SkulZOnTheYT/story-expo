@@ -55,9 +55,10 @@ export class StoryDetailView {
           <div class="story-detail-card">
             <div class="story-detail-image-container">
               <img 
-                src="${story.photoUrl || "/placeholder.svg?height=400&width=800"}" 
+                src="${story.photoUrl || "/placeholder.svg"}" 
                 alt="${story.description ? `Foto untuk cerita: ${story.description.substring(0, 50)}...` : "Foto cerita"}"
                 class="story-detail-image"
+                onerror="this.src='/placeholder.svg'"
               />
             </div>
             
@@ -119,6 +120,10 @@ export class StoryDetailView {
     if (!mapElement) return
 
     try {
+      // Pastikan container memiliki ukuran yang tepat
+      mapElement.style.height = '350px'
+      mapElement.style.width = '100%'
+      
       const map = L.map("story-detail-map").setView([story.lat, story.lon], 13)
 
       // Define multiple tile layers
@@ -164,6 +169,13 @@ export class StoryDetailView {
         })
         .addTo(map)
 
+      // Force map to resize after initialization
+      setTimeout(() => {
+        if (map) {
+          map.invalidateSize()
+        }
+      }, 100)
+
       // Custom marker icon
       const customIcon = L.divIcon({
         html: `<div style="background: linear-gradient(135deg, #6366f1, #ec4899); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 3px solid white;">
@@ -189,6 +201,14 @@ export class StoryDetailView {
       `
 
       marker.bindPopup(popupContent).openPopup()
+      
+      // Final resize after popup is opened
+      setTimeout(() => {
+        if (map) {
+          map.invalidateSize()
+        }
+      }, 300)
+      
     } catch (error) {
       console.error("Error initializing map:", error)
       mapElement.innerHTML = `
