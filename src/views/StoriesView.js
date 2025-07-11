@@ -146,14 +146,57 @@ export class StoriesView {
     // Initialize pagination handlers
     this.initializePagination(pagination)
 
+    // Initialize favorite status for each story
+    this.initializeFavoriteStatus(stories)
     // Initialize maps with enhanced layers
+    // Wait for Leaflet to be fully loaded
     setTimeout(() => {
-      stories.forEach((story) => {
-        if (story.lat && story.lon) {
-          this.initializeEnhancedMap(story)
-        }
+      this.waitForLeaflet().then(() => {
+        stories.forEach((story) => {
+          if (story.lat && story.lon) {
+            this.initializeEnhancedMap(story)
+          }
+        })
       })
-    }, 100)
+    }, 500)
+  }
+
+  async waitForLeaflet() {
+    return new Promise((resolve) => {
+      if (typeof L !== 'undefined') {
+        resolve()
+        return
+      }
+      
+      const checkLeaflet = () => {
+        if (typeof L !== 'undefined') {
+          resolve()
+        } else {
+          setTimeout(checkLeaflet, 200)
+        }
+      }
+      
+      checkLeaflet()
+    })
+  }
+
+  async initializeFavoriteStatus(stories) {
+    // Check favorite status for each story
+    for (const story of stories) {
+      try {
+        const isFavorite = await this.onCheckFavorite ? await this.onCheckFavorite(story.id) : false
+        const favoriteBtn = document.querySelector(`[data-story-id="${story.id}"] .favorite-btn`)
+        if (favoriteBtn) {
+          if (isFavorite) {
+            favoriteBtn.classList.add('active')
+          } else {
+            favoriteBtn.classList.remove('active')
+          }
+        }
+      } catch (error) {
+        console.error('Error checking favorite status:', error)
+      }
+    }
   }
 
   initializePagination(pagination) {
@@ -207,18 +250,66 @@ export class StoriesView {
           storyCard.style.transform = "translateY(0)"
         })
 
-        // Add favorite button functionality if handler exists
+        // Add favorite button functionality
         const favoriteBtn = storyCard.querySelector(".favorite-btn")
-        if (favoriteBtn && this.onFavoriteToggle) {
+        if (favoriteBtn) {
           favoriteBtn.addEventListener("click", (e) => {
             e.stopPropagation()
-            this.onFavoriteToggle(story.id, story)
+            this.handleFavoriteClick(story.id, story, favoriteBtn)
           })
         }
       }
     })
   }
 
+  async handleFavoriteClick(storyId, story, button) {
+    if (!this.onFavoriteToggle) return
+    
+    try {
+      // Toggle favorite status
+      const result = await this.onFavoriteToggle(storyId, story)
+      
+      // Update button appearance
+      if (result.isFavorite) {
+        button.classList.add('active')
+      } else {
+        button.classList.remove('active')
+      }
+      
+      // Show feedback
+      this.showFavoriteMessage(result.message)
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+      this.showFavoriteMessage('Gagal mengubah status favorit', 'error')
+    }
+  }
+
+  showFavoriteMessage(message, type = 'success') {
+    // Create temporary message
+    const messageEl = document.createElement('div')
+    messageEl.className = `favorite-message ${type === 'error' ? 'error' : 'success'}`
+    messageEl.style.cssText = `
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background: ${type === 'error' ? '#ef4444' : '#10b981'};
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      animation: slideInRight 0.3s ease-out;
+    `
+    messageEl.textContent = message
+    
+    document.body.appendChild(messageEl)
+    
+    setTimeout(() => {
+      if (messageEl.parentNode) {
+        messageEl.remove()
+      }
+    }, 3000)
+  }
   initializeEnhancedMap(story) {
     const mapElement = document.getElementById(`map-${story.id}`)
     if (!mapElement) return
@@ -383,5 +474,9 @@ export class StoriesView {
 
   setFavoriteHandler(handler) {
     this.onFavoriteToggle = handler
+  }
+
+  setCheckFavoriteHandler(handler) {
+    this.onCheckFavorite = handler
   }
 }

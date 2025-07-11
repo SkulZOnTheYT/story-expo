@@ -45,6 +45,7 @@ export class StoryPresenter {
       })
 
       this.storiesView.setFavoriteHandler(this.handleToggleFavorite.bind(this))
+      this.storiesView.setCheckFavoriteHandler(this.handleCheckFavorite.bind(this))
 
       // Show success message if data came from cache
       if (result.source === "cache") {
@@ -237,6 +238,15 @@ export class StoryPresenter {
     } catch (error) {
       console.error("Error toggling favorite:", error)
       throw error
+    }
+  }
+
+  async handleCheckFavorite(storyId) {
+    try {
+      return await this.model.isFavorite(storyId)
+    } catch (error) {
+      console.error("Error checking favorite status:", error)
+      return false
     }
   }
 

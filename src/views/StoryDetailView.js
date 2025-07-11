@@ -108,9 +108,30 @@ export class StoryDetailView {
     // Initialize map if coordinates are available
     if (story.lat && story.lon) {
       setTimeout(() => {
-        this.initializeDetailMap(story)
-      }, 100)
+        this.waitForLeaflet().then(() => {
+          this.initializeDetailMap(story)
+        })
+      }, 500)
     }
+  }
+
+  async waitForLeaflet() {
+    return new Promise((resolve) => {
+      if (typeof L !== 'undefined') {
+        resolve()
+        return
+      }
+      
+      const checkLeaflet = () => {
+        if (typeof L !== 'undefined') {
+          resolve()
+        } else {
+          setTimeout(checkLeaflet, 200)
+        }
+      }
+      
+      checkLeaflet()
+    })
   }
 
   initializeDetailMap(story) {
@@ -119,7 +140,16 @@ export class StoryDetailView {
     
     // Check if Leaflet is available
     if (typeof L === 'undefined') {
-      console.error('Leaflet library not loaded')
+      console.log('Leaflet library not loaded, waiting...')
+      // Wait for Leaflet to load
+      setTimeout(() => {
+        this.initializeDetailMap(story)
+      }, 500)
+      return
+    }
+
+    // Double check if Leaflet is really available
+    if (typeof L === 'undefined') {
       mapElement.innerHTML = `
         <div style="padding: 2rem; text-align: center; color: #6b7280; background: #f9fafb; border-radius: 0.75rem;">
           <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f59e0b; margin-bottom: 1rem;"></i>

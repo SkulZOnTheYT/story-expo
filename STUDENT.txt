@@ -1,7 +1,7 @@
 # Story Explorer - Progressive Web Application
 
 ## Deployment URL
-https://story-expo.vercel.app/
+https://story-expo.netlify.app/
 
 ## API Information
 - Story API: https://story-api.dicoding.dev/v1/
