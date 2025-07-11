@@ -1,5 +1,3 @@
-import L from "leaflet"
-
 export class StoryDetailView {
   showLoading(isLoading) {
     const loadingSpinner = document.getElementById("loading-spinner")
@@ -118,6 +116,18 @@ export class StoryDetailView {
   initializeDetailMap(story) {
     const mapElement = document.getElementById("story-detail-map")
     if (!mapElement) return
+    
+    // Check if Leaflet is available
+    if (typeof L === 'undefined') {
+      console.error('Leaflet library not loaded')
+      mapElement.innerHTML = `
+        <div style="padding: 2rem; text-align: center; color: #6b7280; background: #f9fafb; border-radius: 0.75rem;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f59e0b; margin-bottom: 1rem;"></i>
+          <p>Peta tidak dapat dimuat - Library tidak tersedia</p>
+        </div>
+      `
+      return
+    }
 
     try {
       // Pastikan container memiliki ukuran yang tepat

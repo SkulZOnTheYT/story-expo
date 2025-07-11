@@ -414,12 +414,12 @@ class App {
 
       // Validate subscription before sending to server
       if (!subscription || !subscription.endpoint || !subscription.keys) {
-        console.error("Invalid subscription object")
+        console.log("Invalid subscription object - skipping notification setup")
         return
       }
 
       if (!subscription.keys.p256dh || !subscription.keys.auth) {
-        console.error("Missing subscription keys")
+        console.log("Missing subscription keys - skipping notification setup")
         return
       }
 
@@ -430,7 +430,7 @@ class App {
         this.showNotificationBanner(result.message)
       }
     } catch (error) {
-      console.error("Error setting up notifications:", error)
+      console.log("Notification setup skipped:", error.message)
     }
   }
 
